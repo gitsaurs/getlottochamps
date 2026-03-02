@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GetLottoChamps™ — AI Lottery Intelligence</title>
+
+<!-- FONTS: Playfair Display (luxury serif headings) + Plus Jakarta Sans (clean body) + JetBrains Mono (numbers/data) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+<style>
+/* ════════════════════════════════
+   ROOT VARIABLES
+════════════════════════════════ */
+:root {
+  --gold:        #C9920A;
+  --gold-mid:    #E8A910;
+  --gold-bright: #F5C842;
+  --gold-pale:   #FEF5D8;
+  --gold-border: rgba(201,146,10,0.22);
+  --navy:        #07111F;
+  --navy2:       #0D1E35;
+  --navy3:       #162F52;
+  --white:       #FFFFFF;
+  --cream:       #FAFAF7;
+  --cream2:      #F4F0E6;
+  --text1:       #07111F;
+  --text2:       #3A4A5C;
+  --text3:       #7A8C9E;
+  --green:       #16A34A;
+}
+
+/* ════════════════════════════════
+   RESET & BASE
+════════════════════════════════ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:16px; }
+body {
+  font-family:'Plus Jakarta Sans', sans-serif;
+  background: var(--white);
+  color: var(--text1);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ════════════════════════════════
+   COIN CURSOR — desktop only, no trailing cursor
+════════════════════════════════ */
+@media (hover: hover) and (pointer: fine) {
+  * { cursor: none !important; }
+
+  #coin-cursor {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    pointer-events: none;
+    z-index: 999999;
+    /* offset so coin center = pointer tip */
+    margin-left: -20px;
+    margin-top:  -20px;
+    top: 0; left: 0;
+    will-change: transform;
+    /* The coin gently bobs */
+    animation: coinBob 2s ease-in-out infinite;
+    filter: drop-shadow(0 3px 10px rgba(201,146,10,0.7));
+    transition: width 0.2s ease, height 0.2s ease;
+  }
+
+  #coin-cursor.hovered {
+    width: 48px;
+    height: 48px;
+    margin-left: -24px;
+    margin-top: -24px;
+  }
+
+  @keyframes coinBob {
+    0%,100% { transform: translateY(0px) rotate(-3deg); }
+    50%      { transform: translateY(-4px) rotate(3deg); }
+  }
+}
+
+/* ════════════════════════════════
+   PAGE LOADER
+════════════════════════════════ */
+#page-loader {
+  position: fixed; inset: 0;
+  background: var(--navy);
+  z-index: 100000;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 1.4rem;
+}
+.ld-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.6rem; font-weight: 900;
+  color: #fff; letter-spacing: -0.02em;
+}
+.ld-logo span { color: var(--gold-bright); }
+.ld-bar-wrap {
+  width: 200px; height: 2px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 2px; overflow: hidden;
+}
+.ld-bar { height:100%; width:0; background: linear-gradient(90deg,var(--gold),var(--gold-bright)); }
+.ld-num {
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.7rem; letter-spacing:0.14em;
+  color: rgba(255,255,255,0.3);
+}
+
+/* ════════════════════════════════
+   NAVIGATION
+════════════════════════════════ */
+.site-nav {
+  position: fixed; top:0; left:0; right:0;
+  z-index: 5000;
+  height: 68px;
+  padding: 0 3rem;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: background 0.35s, box-shadow 0.35s;
+}
+.site-nav.scrolled {
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.08);
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem; font-weight: 900;
+  color: var(--navy); text-decoration: none;
+  letter-spacing: -0.02em; flex-shrink:0;
+}
+.nav-logo span { color: var(--gold); }
+
+.nav-links {
+  display: flex; align-items: center; gap: 2rem;
+}
+.nav-links a {
+  font-size: 0.75rem; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--text2); text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--navy); }
+.nav-cta {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  background: var(--navy); color: var(--gold-bright) !important;
+  padding: 0.55rem 1.3rem; border-radius: 3px;
+  font-size: 0.72rem !important; font-weight: 800 !important;
+  letter-spacing: 0.09em !important; transition: all 0.25s !important;
+}
+.nav-cta:hover { background: var(--gold) !important; color: var(--navy) !important; }
+
+.nav-toggle {
+  display: none; flex-direction: column; gap: 5px;
+  background: none; border: none; padding: 4px;
+}
+.nav-toggle span { display:block; width:24px; height:2px; background:var(--navy); border-radius:2px; }
+
+.mob-drawer {
+  display: none; position: fixed; inset:0; top:68px;
+  background: rgba(7,17,31,0.97); z-index: 4999;
+  flex-direction: column; align-items: center; justify-content: center; gap:2rem;
+}
+.mob-drawer.open { display: flex; }
+.mob-drawer a {
+  font-size: 1.5rem; font-weight: 700;
+  color: rgba(255,255,255,0.8); text-decoration: none;
+  font-family: 'Playfair Display', serif;
+  transition: color 0.2s;
+}
+.mob-drawer a:hover { color: var(--gold-bright); }
+
+/* ════════════════════════════════
+   SHARED UTILITIES
+════════════════════════════════ */
+.container {
+  width: 100%; max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 3rem;
+}
+
+.tag-line {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+.tag-line::before { content: '◈'; opacity: 0.5; }
+
+.section-heading {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.2rem,3.5vw,3.5rem);
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+.section-heading em { font-style: italic; color: var(--gold); }
+.section-heading strong { font-weight: 900; }
+
+.section-sub {
+  font-size: 1rem;
+  color: var(--text2);
+  line-height: 1.75;
+  max-width: 500px;
+  margin-top: 0.9rem;
+}
+
+/* BUTTONS */
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  background: var(--gold); color: var(--navy);
+  padding: 1rem 2.2rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.82rem; font-weight: 800;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  text-decoration: none; border: none; border-radius: 4px;
+  transition: all 0.28s;
+  box-shadow: 0 6px 20px rgba(201,146,10,0.32);
+}
+.btn-primary:hover {
+  background: var(--gold-bright);
+  box-shadow: 0 10px 28px rgba(201,146,10,0.45);
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  background: transparent; color: var(--navy);
+  padding: 1rem 2rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.82rem; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  text-decoration: none; border: 2px solid var(--navy);
+  border-radius: 4px; transition: all 0.25s;
+}
+.btn-outline:hover { background: var(--navy); color: var(--white); }
+
+.btn-outline-light {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  background: transparent; color: rgba(255,255,255,0.75);
+  padding: 1rem 2rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.82rem; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  text-decoration: none; border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 4px; transition: all 0.25s;
+}
+.btn-outline-light:hover { border-color: var(--gold-bright); color: var(--gold-bright); }
+
+/* SCROLL REVEAL */
+.reveal { opacity:0; transform: translateY(32px); }
+
+/* ════════════════════════════════
+   HERO — FIXED LAYOUT
+   Left (white) | Right (dark)
+   Two independent full-height columns
+════════════════════════════════ */
+.hero-section {
+  /* full viewport, no grid tricks that cause overflow */
+  min-height: 100vh;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Left white column */
+.hero-left {
+  flex: 0 0 50%;
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 110px 4rem 80px 3rem;
+  position: relative;
+  z-index: 2;
+}
+
+/* Right dark column */
+.hero-right {
+  flex: 0 0 50%;
+  background: var(--navy2);
+  background-image: linear-gradient(155deg, var(--navy) 0%, var(--navy2) 45%, var(--navy3) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 110px 3rem 80px;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+.hero-right::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(245,200,66,0.05) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(245,200,66,0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+.hero-right::after {
+  content: '';
+  position: absolute;
+  width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,146,10,0.13) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  pointer-events: none;
+}
+
+/* Live badge */
+.live-badge {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  background: var(--gold-pale);
+  border: 1.5px solid var(--gold-border);
+  padding: 0.38rem 1rem; border-radius: 100px;
+  width: fit-content;
+  margin-bottom: 1.8rem;
+}
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 3px rgba(22,163,74,0.2);
+  animation: livePulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes livePulse {
+  0%,100% { box-shadow: 0 0 0 3px rgba(22,163,74,0.2); }
+  50%      { box-shadow: 0 0 0 7px rgba(22,163,74,0); }
+}
+.live-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.66rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* Hero headline — THE FIX: no conflicting flex/display */
+.hero-h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3.4rem, 5.5vw, 6rem);
+  font-weight: 900;
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+  color: var(--navy);
+  margin-bottom: 1.5rem;
+  /* critical: just block-level, let lines wrap naturally */
+  display: block;
+}
+.hero-h1 .line-italic {
+  display: block;
+  font-style: italic;
+  color: var(--gold);
+  font-weight: 700;
+}
+.hero-h1 .line-bold {
+  display: block;
+  font-weight: 900;
+  color: var(--navy);
+}
+.hero-h1 .line-normal {
+  display: block;
+  font-weight: 400;
+  color: var(--navy);
+}
+
+.hero-desc {
+  font-size: 1.02rem;
+  color: var(--text2);
+  line-height: 1.78;
+  max-width: 420px;
+  margin-bottom: 2.2rem;
+}
+
+.hero-actions {
+  display: flex; gap: 0.9rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+}
+
+/* Hero stats — clear, visible numbers */
+.hero-stats {
+  display: flex; gap: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1.5px solid rgba(201,146,10,0.18);
+}
+.hstat {}
+.hstat-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem; font-weight: 900;
+  color: var(--navy); /* dark on white — fully visible */
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.hstat-number em {
+  font-style: normal;
+  color: var(--gold);
+}
+.hstat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text3);
+  margin-top: 0.3rem;
+}
+
+/* Lottery balls */
+.balls-stage {
+  position: relative; z-index: 2;
+  width: 300px; height: 300px;
+  flex-shrink: 0;
+}
+.lball {
+  position: absolute; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  animation: ballFloat 3s ease-in-out infinite;
+  box-shadow:
+    0 20px 50px rgba(0,0,0,0.5),
+    inset 0 -6px 14px rgba(0,0,0,0.3),
+    inset 0 6px 14px rgba(255,255,255,0.2);
+}
+.lb-gold { background: linear-gradient(145deg,#FFE060 0%,#E8A910 40%,#B8780A 100%); color: var(--navy); }
+.lb-dark { background: linear-gradient(145deg,#1A3460 0%,#0D1E35 60%,#07111F 100%); color: var(--gold-bright); border:2px solid rgba(245,200,66,0.3); }
+.lb1 { width:104px;height:104px;font-size:2.1rem; top:28px;left:98px; animation-delay:0s; }
+.lb2 { width:72px;height:72px;font-size:1.45rem; top:78px;left:10px; animation-delay:0.5s; }
+.lb3 { width:80px;height:80px;font-size:1.6rem; top:90px;right:10px; animation-delay:0.9s; }
+.lb4 { width:64px;height:64px;font-size:1.28rem; bottom:80px;left:8px; animation-delay:1.3s; }
+.lb5 { width:90px;height:90px;font-size:1.8rem; bottom:42px;left:102px; animation-delay:0.4s; }
+.lb6 { width:68px;height:68px;font-size:1.36rem; bottom:72px;right:10px; animation-delay:1.7s; }
+@keyframes ballFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-13px)} }
+
+/* AI Prediction widget */
+.pred-card {
+  position: relative; z-index: 2;
+  margin-top: 1.8rem;
+  width: 100%; max-width: 320px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(245,200,66,0.22);
+  border-radius: 8px;
+  padding: 1.2rem 1.4rem;
+  backdrop-filter: blur(18px);
+}
+.pc-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1rem;
+}
+.pc-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+}
+.pc-live {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem; font-weight: 700;
+  color: var(--green);
+}
+.pc-live-dot { width:6px;height:6px;border-radius:50%;background:var(--green);animation:livePulse 1.5s infinite; }
+
+.pc-balls { display:flex; gap:0.45rem; justify-content:center; }
+.pcb {
+  width:42px;height:42px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:900;
+}
+.pcb-g { background:linear-gradient(145deg,#FFE060,#C9920A); color:var(--navy); box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+.pcb-d { background:rgba(255,255,255,0.08); color:var(--gold-bright); border:1px solid rgba(245,200,66,0.3); }
+.pcb-pb { background:var(--gold); color:var(--navy); font-size:0.65rem;font-weight:800;letter-spacing:0.04em; box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+
+.pc-bar { margin-top:1rem; }
+.pc-bar-row { display:flex;justify-content:space-between;margin-bottom:0.4rem; }
+.pc-bar-row span { font-family:'JetBrains Mono',monospace;font-size:0.62rem;font-weight:600;color:rgba(255,255,255,0.38); }
+.pc-bar-row strong { font-family:'JetBrains Mono',monospace;font-size:0.62rem;font-weight:800;color:var(--gold-bright); }
+.pc-track { height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden; }
+.pc-fill { height:100%;width:87%;background:linear-gradient(90deg,var(--gold),var(--gold-bright));border-radius:2px; }
+
+/* ════════════════════════════════
+   TICKER STRIP
+════════════════════════════════ */
+.ticker-strip {
+  background: var(--navy);
+  padding: 0.85rem 0; overflow: hidden;
+  border-top: 1px solid rgba(245,200,66,0.08);
+}
+.ticker-belt { display:flex; white-space:nowrap; animation:belt 22s linear infinite; }
+.titem {
+  display:inline-flex;align-items:center;gap:0.9rem;padding:0 2rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;
+  color:rgba(255,255,255,0.42);
+  flex-shrink:0;
+}
+.titem strong { color:var(--gold-bright); font-weight:700; }
+.tsep { color:rgba(245,200,66,0.3); padding:0 0.4rem; font-size:1rem; }
+@keyframes belt { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+/* ════════════════════════════════
+   HOW IT WORKS
+════════════════════════════════ */
+.how-section {
+  padding: 7rem 0;
+  background: var(--cream);
+}
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  margin-top: 3.5rem;
+  border: 1.5px solid rgba(201,146,10,0.16);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.step-card {
+  background: var(--white);
+  padding: 2.8rem 2.4rem;
+  border-right: 1.5px solid rgba(201,146,10,0.16);
+  position: relative; overflow: hidden;
+  transition: background 0.3s;
+}
+.step-card:last-child { border-right: none; }
+.step-card::after {
+  content:''; position:absolute; bottom:0;left:0;right:0;height:3px;
+  background: linear-gradient(90deg,var(--gold),var(--gold-bright));
+  transform: scaleX(0); transform-origin:left;
+  transition: transform 0.4s ease;
+}
+.step-card:hover { background: var(--gold-pale); }
+.step-card:hover::after { transform: scaleX(1); }
+
+.step-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 5rem; font-weight: 900;
+  color: rgba(201,146,10,0.1); line-height:1;
+  margin-bottom: 0.8rem; transition:color 0.3s;
+}
+.step-card:hover .step-num { color: rgba(201,146,10,0.25); }
+.step-icon-box {
+  width:48px;height:48px;border-radius:4px;
+  background:var(--gold-pale);border:1.5px solid var(--gold-border);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:1.1rem; transition:all 0.3s;
+}
+.step-card:hover .step-icon-box { background:var(--gold); border-color:var(--gold); }
+.step-icon-box svg { stroke:var(--gold); transition:stroke 0.3s; }
+.step-card:hover .step-icon-box svg { stroke:#fff; }
+.step-title {
+  font-family: 'Playfair Display', serif;
+  font-size:1.15rem;font-weight:700;color:var(--navy);margin-bottom:0.7rem;
+}
+.step-desc { font-size:0.87rem;color:var(--text2);line-height:1.78; }
+
+/* Demo box */
+.demo-box {
+  max-width: 400px; margin: 3.5rem auto 0;
+  background: var(--white);
+  border: 1.5px solid var(--gold-border);
+  border-radius: 8px; overflow:hidden;
+  box-shadow: 0 12px 40px rgba(201,146,10,0.1);
+}
+.demo-head {
+  background: var(--navy); padding: 1rem 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.demo-label {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  color:rgba(255,255,255,0.5);
+}
+.demo-live {
+  display:flex;align-items:center;gap:0.4rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.65rem;font-weight:800;color:var(--green);
+}
+.demo-dot { width:6px;height:6px;border-radius:50%;background:var(--green);animation:livePulse 1.5s infinite; }
+.demo-body { padding:1.5rem; }
+.demo-game {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:1rem;
+}
+.demo-nums { display:flex;gap:0.55rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.4rem; }
+.dnum {
+  width:48px;height:48px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:900;
+}
+.dnum-g { background:linear-gradient(145deg,#FFE060,#C9920A);color:var(--navy);box-shadow:0 4px 14px rgba(0,0,0,0.14); }
+.dnum-d { background:var(--navy);color:var(--gold-bright); }
+.dnum-pb { background:var(--gold);color:var(--navy);font-size:0.68rem;font-weight:800;letter-spacing:0.05em; }
+.demo-conf-row { display:flex;justify-content:space-between;align-items:center;margin-bottom:0.45rem; }
+.demo-conf-label { font-size:0.72rem;font-weight:600;color:var(--text2); }
+.demo-conf-val { font-family:'JetBrains Mono',monospace;font-size:0.72rem;font-weight:800;color:var(--navy); }
+.demo-track { height:6px;background:var(--cream2);border-radius:3px;overflow:hidden; }
+.demo-bar { height:100%;width:87%;background:linear-gradient(90deg,var(--gold),var(--gold-bright));border-radius:3px; }
+.demo-footer {
+  display:flex;justify-content:space-between;
+  padding-top:1rem;border-top:1px solid var(--cream2);
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.65rem;color:var(--text3);font-weight:600;margin-top:1rem;
+}
+.demo-fresh { color:var(--gold);font-weight:700; }
+
+/* ════════════════════════════════
+   WINNERS MARQUEE
+════════════════════════════════ */
+.winners-bar {
+  background: linear-gradient(90deg,var(--gold) 0%,var(--gold-bright) 50%,var(--gold) 100%);
+  padding: 0.95rem 0; overflow:hidden;
+}
+.winners-belt { display:flex;white-space:nowrap;animation:belt 26s linear infinite; }
+.witem { display:inline-flex;align-items:center;gap:1rem;padding:0 2.5rem;flex-shrink:0; }
+.wname { font-family:'Plus Jakarta Sans',sans-serif;font-size:0.92rem;font-weight:800;color:var(--navy); }
+.wamt { font-size:0.8rem;font-weight:600;color:rgba(7,17,31,0.55); }
+.wsep { color:rgba(7,17,31,0.25);font-size:1.2rem; }
+
+/* ════════════════════════════════
+   FEATURES
+════════════════════════════════ */
+.features-section {
+  padding: 7rem 0;
+  background: var(--navy);
+}
+.features-section .tag-line { color:rgba(245,200,66,0.6); }
+.features-section .section-heading { color:var(--white); }
+.features-section .section-sub { color:rgba(255,255,255,0.45); }
+
+.feat-grid {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  border: 1px solid rgba(245,200,66,0.1);
+  border-radius: 6px; overflow:hidden; margin-top:3.5rem;
+}
+.feat-card {
+  padding: 2.5rem;
+  border-right: 1px solid rgba(245,200,66,0.1);
+  border-bottom: 1px solid rgba(245,200,66,0.1);
+  position: relative; overflow:hidden;
+  transition: background 0.3s;
+}
+.feat-card:nth-child(3n) { border-right: none; }
+.feat-card:nth-last-child(-n+3) { border-bottom: none; }
+.feat-card::before {
+  content:''; position:absolute; top:0;left:0;height:3px;width:0;
+  background:linear-gradient(90deg,var(--gold),var(--gold-bright));
+  transition:width 0.4s ease;
+}
+.feat-card:hover::before { width:100%; }
+.feat-card:hover { background:rgba(245,200,66,0.04); }
+.feat-id {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.6rem;letter-spacing:0.18em;font-weight:600;
+  color:rgba(245,200,66,0.32);margin-bottom:1.2rem;
+}
+.feat-icon-box {
+  width:46px;height:46px;border-radius:4px;
+  background:rgba(245,200,66,0.09);
+  border:1px solid rgba(245,200,66,0.14);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:1.1rem; transition:all 0.3s;
+}
+.feat-card:hover .feat-icon-box { background:rgba(245,200,66,0.18);border-color:rgba(245,200,66,0.3); }
+.feat-icon-box svg { stroke:var(--gold-bright); }
+.feat-title { font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--white);margin-bottom:0.65rem; }
+.feat-desc { font-size:0.84rem;color:rgba(255,255,255,0.46);line-height:1.78; }
+
+/* ════════════════════════════════
+   GALLERY
+════════════════════════════════ */
+.gallery-section { padding:7rem 0; background:var(--cream2); }
+.gallery-top {
+  display:flex;align-items:flex-end;justify-content:space-between;
+  margin-bottom:3rem; flex-wrap:wrap; gap:1.5rem;
+}
+.gal-grid {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 12px;
+}
+.gitem { overflow:hidden;border-radius:4px;position:relative;background:var(--navy); }
+.gitem img { width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.7s ease; }
+.gitem:hover img { transform:scale(1.06); }
+.gitem-overlay {
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(7,17,31,0.88) 0%,rgba(7,17,31,0.1) 55%,transparent 100%);
+  opacity:0;transition:opacity 0.4s;
+}
+.gitem:hover .gitem-overlay { opacity:1; }
+.gitem-cap {
+  position:absolute;bottom:1.3rem;left:1.3rem;right:1.3rem;z-index:2;
+  opacity:0;transform:translateY(8px);transition:all 0.4s;
+}
+.gitem:hover .gitem-cap { opacity:1;transform:translateY(0); }
+.gcap-tag {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.58rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--gold-bright);margin-bottom:0.2rem;
+}
+.gcap-name { font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:#fff; }
+.gi1{grid-column:1/8;height:340px;}
+.gi2{grid-column:8/10;height:340px;}
+.gi3{grid-column:10/13;height:340px;}
+.gi4{grid-column:1/5;height:252px;}
+.gi5{grid-column:5/9;height:252px;}
+.gi6{grid-column:9/13;height:252px;}
+
+/* ════════════════════════════════
+   TESTIMONIALS
+════════════════════════════════ */
+.testi-section { padding:7rem 0; background:var(--white); }
+.testi-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin-top:4rem; }
+.tc {
+  background:var(--cream);
+  border:1.5px solid rgba(201,146,10,0.13);
+  border-radius:6px;padding:2.4rem;
+  transition:all 0.3s;
+  box-shadow:0 4px 20px rgba(0,0,0,0.03);
+}
+.tc:hover { box-shadow:0 20px 56px rgba(201,146,10,0.13);border-color:rgba(201,146,10,0.36);transform:translateY(-5px); }
+.tc-stars { display:flex;gap:2px;margin-bottom:0.9rem; }
+.tc-star { color:var(--gold);font-size:0.9rem; }
+.tc-qmark {
+  font-family:'Playfair Display',serif;font-size:5rem;
+  line-height:0.8;color:var(--gold);opacity:0.2;
+  display:block;margin-bottom:-0.3rem;
+}
+.tc-text { font-size:0.91rem;color:var(--text2);line-height:1.8;font-style:italic;margin-bottom:1.4rem; }
+.tc-foot { display:flex;align-items:center;gap:0.85rem;padding-top:1.1rem;border-top:1px solid rgba(201,146,10,0.12); }
+.tc-av { width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid var(--gold-pale); }
+.tc-name { font-size:0.88rem;font-weight:800;color:var(--navy); }
+.tc-win { font-size:0.72rem;color:var(--gold);font-weight:700;margin-top:0.1rem; }
+
+/* ════════════════════════════════
+   PRICING
+════════════════════════════════ */
+.pricing-section { padding:7rem 0; background:var(--cream); }
+.pricing-card {
+  max-width:540px;margin:4rem auto 0;
+  background:var(--navy);border-radius:8px;overflow:hidden;
+  box-shadow:0 40px 90px rgba(7,17,31,0.22),0 0 0 1px rgba(245,200,66,0.1);
+}
+.pricing-topbar { height:4px;background:linear-gradient(90deg,var(--gold),var(--gold-bright),var(--gold)); }
+.pricing-inner { padding:3.5rem; }
+.pricing-badge {
+  display:inline-flex;align-items:center;gap:0.5rem;
+  background:rgba(245,200,66,0.1);border:1px solid rgba(245,200,66,0.22);
+  color:var(--gold-bright);font-size:0.62rem;font-weight:800;
+  letter-spacing:0.16em;text-transform:uppercase;
+  padding:0.35rem 0.9rem;border-radius:100px;margin-bottom:2rem;
+}
+.pricing-old { font-size:0.95rem;color:rgba(255,255,255,0.3);text-decoration:line-through;margin-bottom:0.4rem;font-weight:600; }
+.pricing-price {
+  font-family:'Playfair Display',serif;
+  font-size:5.5rem;font-weight:900;color:var(--white);line-height:1;margin-bottom:0.5rem;
+}
+.pricing-price sup { font-size:2.2rem;vertical-align:super;margin-right:0.1rem; }
+.pricing-period { font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:rgba(255,255,255,0.35);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2.5rem;font-weight:600; }
+.pricing-feats { text-align:left;margin-bottom:2.5rem; }
+.pf {
+  display:flex;align-items:flex-start;gap:0.75rem;
+  padding:0.72rem 0;border-bottom:1px solid rgba(255,255,255,0.05);
+  font-size:0.87rem;color:rgba(255,255,255,0.75);font-weight:500;
+}
+.pf:last-child { border-bottom:none; }
+.pf-check {
+  width:18px;height:18px;border-radius:50%;
+  background:rgba(22,163,74,0.15);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;color:var(--green);
+  font-size:0.68rem;font-weight:900;
+}
+.pricing-guar {
+  display:flex;align-items:center;justify-content:center;gap:0.6rem;
+  margin-top:1.2rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.66rem;color:rgba(255,255,255,0.25);font-weight:600;letter-spacing:0.02em;
+}
+
+/* ════════════════════════════════
+   FAQ
+════════════════════════════════ */
+.faq-section { padding:7rem 0;background:var(--white); }
+.faq-cols {
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:0;margin-top:4rem;
+  border-top:1.5px solid rgba(201,146,10,0.14);
+}
+.faq-item { padding:1.8rem 0;border-bottom:1.5px solid rgba(201,146,10,0.14); }
+.faq-item:nth-child(odd) { padding-right:3rem;border-right:1.5px solid rgba(201,146,10,0.14); }
+.faq-item:nth-child(even) { padding-left:3rem; }
+.faq-q {
+  display:flex;justify-content:space-between;align-items:center;gap:1rem;
+  font-family:'Playfair Display',serif;
+  font-size:0.96rem;font-weight:700;color:var(--navy);
+  cursor:pointer;user-select:none;transition:color 0.2s;
+}
+.faq-q:hover { color:var(--gold); }
+.faq-icon {
+  width:26px;height:26px;flex-shrink:0;
+  border:2px solid rgba(7,17,31,0.16);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;font-weight:700;color:var(--text2);transition:all 0.3s;
+}
+.faq-item.open .faq-icon { background:var(--gold);border-color:var(--gold);color:var(--navy);transform:rotate(45deg); }
+.faq-a {
+  font-size:0.85rem;color:var(--text2);line-height:1.8;
+  max-height:0;overflow:hidden;transition:max-height 0.4s ease,margin-top 0.3s;
+}
+.faq-item.open .faq-a { max-height:200px;margin-top:0.9rem; }
+
+/* ════════════════════════════════
+   CTA
+════════════════════════════════ */
+.cta-section {
+  padding:8rem 0;background:var(--navy);
+  text-align:center;position:relative;overflow:hidden;
+}
+.cta-glow {
+  position:absolute;top:-200px;left:50%;transform:translateX(-50%);
+  width:880px;height:880px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,146,10,0.08) 0%,transparent 65%);
+  pointer-events:none;
+}
+.cta-title {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2.8rem,5vw,5.5rem);font-weight:900;
+  color:var(--white);line-height:1.05;
+  letter-spacing:-0.025em;margin-bottom:1.5rem;
+}
+.cta-title em { font-style:italic;color:var(--gold-bright); }
+.cta-sub { font-size:1rem;color:rgba(255,255,255,0.42);max-width:460px;margin:0 auto 3rem;line-height:1.7; }
+.cta-balls { display:flex;justify-content:center;gap:1rem;margin-bottom:3rem; }
+.cta-ball {
+  width:58px;height:58px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:900;
+  box-shadow:0 10px 28px rgba(0,0,0,0.35);
+  animation:ballFloat 3s ease-in-out infinite;
+}
+.cta-ball.cg{background:linear-gradient(145deg,#FFE060,#C9920A);color:var(--navy);}
+.cta-ball.cd{background:var(--navy3);color:var(--gold-bright);border:2px solid rgba(245,200,66,0.28);}
+.cta-ball:nth-child(1){animation-delay:0s;}
+.cta-ball:nth-child(2){animation-delay:0.3s;}
+.cta-ball:nth-child(3){animation-delay:0.6s;}
+.cta-ball:nth-child(4){animation-delay:0.9s;}
+.cta-ball:nth-child(5){animation-delay:1.2s;}
+
+/* ════════════════════════════════
+   FOOTER
+════════════════════════════════ */
+footer { background:#050D18;padding:5rem 0 2rem; }
+.foot-grid {
+  display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;
+  margin-bottom:4rem;padding-bottom:4rem;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.foot-logo { font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:900;color:var(--white);margin-bottom:1rem;text-decoration:none;display:block; }
+.foot-logo span { color:var(--gold-bright); }
+.foot-about { font-size:0.83rem;color:rgba(255,255,255,0.32);line-height:1.75;margin-bottom:1.5rem; }
+.foot-socials { display:flex;gap:0.6rem; }
+.fsoc {
+  width:36px;height:36px;border:1px solid rgba(255,255,255,0.1);border-radius:3px;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,0.32);font-size:0.75rem;font-weight:700;text-decoration:none;
+  transition:all 0.2s;
+}
+.fsoc:hover { border-color:var(--gold);color:var(--gold-bright); }
+.foot-head { font-family:'JetBrains Mono',monospace;font-size:0.64rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.2);margin-bottom:1.2rem; }
+.foot-col ul { list-style:none;display:flex;flex-direction:column;gap:0.65rem; }
+.foot-col ul a { font-size:0.82rem;color:rgba(255,255,255,0.4);text-decoration:none;transition:color 0.2s;font-weight:500; }
+.foot-col ul a:hover { color:var(--gold-bright); }
+.foot-bottom { display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem; }
+.foot-copy { font-size:0.73rem;color:rgba(255,255,255,0.16);font-weight:500; }
+.foot-legal { display:flex;gap:1.5rem; }
+.foot-legal a { font-size:0.7rem;color:rgba(255,255,255,0.18);text-decoration:none; }
+.foot-legal a:hover { color:rgba(255,255,255,0.38); }
+
+/* ════════════════════════════════
+   RESPONSIVE
+════════════════════════════════ */
+@media(max-width:1024px){
+  .feat-grid { grid-template-columns:repeat(2,1fr); }
+  .feat-card:nth-child(3n){ border-right:1px solid rgba(245,200,66,0.1); }
+  .feat-card:nth-child(2n){ border-right:none; }
+  .feat-card:nth-last-child(-n+2){ border-bottom:none; }
+  .feat-card:nth-last-child(3){ border-bottom:1px solid rgba(245,200,66,0.1); }
+  .foot-grid { grid-template-columns:1fr 1fr; }
+}
+
+@media(max-width:900px){
+  .hero-section { flex-direction:column; }
+  .hero-left { flex:unset;width:100%;padding:90px 2rem 3rem; }
+  .hero-right { flex:unset;width:100%;padding:3rem 2rem; min-height:auto; }
+}
+
+@media(max-width:768px){
+  .site-nav { padding:0 1.5rem; }
+  .nav-links { display:none; }
+  .nav-toggle { display:flex; }
+  .container { padding:0 1.5rem; }
+  .hero-left { padding:86px 1.5rem 2.5rem; }
+  .hero-right { padding:2.5rem 1.5rem; }
+  .balls-stage { width:250px;height:250px; }
+  .lb1{width:84px;height:84px;font-size:1.7rem;top:22px;left:83px;}
+  .lb2{width:62px;height:62px;font-size:1.25rem;top:65px;left:10px;}
+  .lb3{width:68px;height:68px;font-size:1.35rem;top:70px;right:8px;}
+  .lb4{width:56px;height:56px;font-size:1.1rem;bottom:70px;left:8px;}
+  .lb5{width:76px;height:76px;font-size:1.5rem;bottom:36px;left:84px;}
+  .lb6{width:60px;height:60px;font-size:1.2rem;bottom:65px;right:8px;}
+  .steps-grid { grid-template-columns:1fr; }
+  .step-card { border-right:none;border-bottom:1.5px solid rgba(201,146,10,0.16); }
+  .step-card:last-child { border-bottom:none; }
+  .feat-grid { grid-template-columns:1fr; }
+  .feat-card { border-right:none!important;border-bottom:1px solid rgba(245,200,66,0.1)!important; }
+  .feat-card:last-child { border-bottom:none!important; }
+  .gi1{grid-column:1/13;height:220px;}
+  .gi2{grid-column:1/7;height:178px;}
+  .gi3{grid-column:7/13;height:178px;}
+  .gi4{grid-column:1/7;height:160px;}
+  .gi5{grid-column:7/13;height:160px;}
+  .gi6{grid-column:1/13;height:180px;}
+  .testi-grid { grid-template-columns:1fr; }
+  .faq-cols { grid-template-columns:1fr; }
+  .faq-item:nth-child(odd){ padding-right:0;border-right:none; }
+  .faq-item:nth-child(even){ padding-left:0; }
+  .foot-grid { grid-template-columns:1fr; }
+  .foot-bottom { flex-direction:column;align-items:flex-start; }
+  .hero-stats { flex-wrap:wrap;gap:1.5rem; }
+  .hero-actions { flex-direction:column;align-items:flex-start; }
+  .btn-primary,.btn-outline { width:100%;justify-content:center; }
+  .pricing-inner { padding:2rem 1.5rem; }
+  .cta-balls { gap:0.6rem; }
+  .cta-ball { width:46px;height:46px;font-size:1.1rem; }
+  .gallery-top { flex-direction:column;align-items:flex-start; }
+  .how-section,.features-section,.gallery-section,.testi-section,.pricing-section,.faq-section,.cta-section { padding:5rem 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ COIN CURSOR ══════════════ -->
+<div id="coin-cursor">
+  <!-- Detailed gold coin SVG — single element, no trail -->
+  <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="cg1" cx="38%" cy="32%" r="72%">
+        <stop offset="0%"   stop-color="#FFF5B0"/>
+        <stop offset="28%"  stop-color="#F5C832"/>
+        <stop offset="62%"  stop-color="#D4920A"/>
+        <stop offset="100%" stop-color="#7A4E00"/>
+      </radialGradient>
+      <radialGradient id="csheen" cx="30%" cy="28%" r="45%">
+        <stop offset="0%"   stop-color="rgba(255,255,220,0.45)"/>
+        <stop offset="100%" stop-color="rgba(255,255,220,0)"/>
+      </radialGradient>
+    </defs>
+    <!-- Shadow -->
+    <ellipse cx="20" cy="37" rx="12" ry="2.5" fill="rgba(0,0,0,0.18)"/>
+    <!-- Main coin body -->
+    <circle cx="20" cy="19" r="18" fill="url(#cg1)"/>
+    <!-- Outer rim -->
+    <circle cx="20" cy="19" r="18" fill="none" stroke="#8B5E00" stroke-width="1.2"/>
+    <!-- Inner groove ring -->
+    <circle cx="20" cy="19" r="15.5" fill="none" stroke="rgba(255,210,60,0.45)" stroke-width="0.8"/>
+    <!-- Shine highlight -->
+    <ellipse cx="14" cy="12" rx="5" ry="3.2" fill="url(#csheen)" transform="rotate(-28 14 12)"/>
+    <!-- $ symbol -->
+    <text x="20" y="26" text-anchor="middle"
+      font-size="16" font-weight="900"
+      font-family="Georgia,'Times New Roman',serif"
+      fill="#4A2800" opacity="0.92">$</text>
+    <!-- Edge detail lines (simulate reeding) -->
+    <circle cx="20" cy="19" r="18" fill="url(#csheen)" opacity="0.3"/>
+  </svg>
+</div>
+
+<!-- ══════════════ PAGE LOADER ══════════════ -->
+<div id="page-loader">
+  <div class="ld-logo">Get<span>Lotto</span>Champs™</div>
+  <div class="ld-bar-wrap"><div class="ld-bar" id="ldrBar"></div></div>
+  <div class="ld-num" id="ldrNum">0%</div>
+</div>
+
+<!-- ══════════════ MOBILE DRAWER ══════════════ -->
+<div class="mob-drawer" id="mobDrawer">
+  <a href="#how" onclick="closeNav()">How It Works</a>
+  <a href="#features" onclick="closeNav()">Features</a>
+  <a href="#gallery" onclick="closeNav()">Gallery</a>
+  <a href="#testimonials" onclick="closeNav()">Winners</a>
+  <a href="#pricing" onclick="closeNav()">Pricing</a>
+  <a href="#pricing" class="btn-primary" onclick="closeNav()" style="padding:0.95rem 2.5rem">Get Started</a>
+</div>
+
+<!-- ══════════════ NAV ══════════════ -->
+<nav class="site-nav" id="siteNav">
+  <a href="#" class="nav-logo">Get<span>Lotto</span>Champs™</a>
+  <div class="nav-links">
+    <a href="#how">How It Works</a>
+    <a href="#features">Features</a>
+    <a href="#gallery">Gallery</a>
+    <a href="#testimonials">Winners</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#pricing" class="nav-cta">Get Started</a>
+  </div>
+  <button class="nav-toggle" id="navToggle" onclick="toggleNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ══════════════════════════════════════
+     HERO SECTION
+     Left = white background, all content left-aligned
+     Right = dark background, balls + widget
+══════════════════════════════════════ -->
+<section class="hero-section">
+
+  <!-- LEFT COLUMN -->
+  <div class="hero-left">
+
+    <h1 class="hero-h1" id="heroTitle">
+      <span class="line-italic">Predict.</span>
+      <span class="line-bold">Win.</span>
+      <span class="line-normal">Repeat.</span>
+    </h1>
+
+    <p class="hero-desc">
+      GetLottoChamps transforms guesswork into strategy. Our AI analyzes 25M+ lottery draws to deliver personalized, data-driven number predictions — giving you the measurable edge that luck alone never could.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#pricing" class="btn-primary">
+        <span>Start Winning Now</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#how" class="btn-outline">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none"/></svg>
+        <span>See How It Works</span>
+      </a>
+    </div>
+
+    <!-- STATS: dark text on white = fully readable -->
+    <div class="hero-stats">
+      <div class="hstat">
+        <div class="hstat-number"><span class="cnt" data-to="94">0</span><em>%</em></div>
+        <div class="hstat-label">Accuracy Rate</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-number"><span class="cnt" data-to="250">0</span><em>K+</em></div>
+        <div class="hstat-label">Active Members</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-number"><span class="cnt" data-to="12">0</span><em>M+</em></div>
+        <div class="hstat-label">Total Winnings</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="hero-right">
+    <div class="balls-stage">
+      <div class="lball lb-gold lb1">07</div>
+      <div class="lball lb-dark lb2">23</div>
+      <div class="lball lb-gold lb3">14</div>
+      <div class="lball lb-dark lb4">39</div>
+      <div class="lball lb-gold lb5">42</div>
+      <div class="lball lb-dark lb6">08</div>
+    </div>
+
+    <div class="pred-card">
+      <div class="pc-header">
+        <span class="pc-label">Prediction Engine</span>
+        <span class="pc-live"><span class="pc-live-dot"></span>LIVE</span>
+      </div>
+      <div class="pc-balls">
+        <div class="pcb pcb-g">07</div>
+        <div class="pcb pcb-d">14</div>
+        <div class="pcb pcb-g">23</div>
+        <div class="pcb pcb-d">38</div>
+        <div class="pcb pcb-g">42</div>
+        <div class="pcb pcb-pb">PB</div>
+      </div>
+      <div class="pc-bar">
+        <div class="pc-bar-row"><span>AI Confidence</span><strong>87%</strong></div>
+        <div class="pc-track"><div class="pc-fill"></div></div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- TICKER -->
+<div class="ticker-strip">
+  <div class="ticker-belt">
+    <div class="titem">🏆 James T. won <strong>$580,000</strong> · Mega Millions</div><span class="tsep">·</span>
+    <div class="titem">📊 Accuracy Rate <strong>94.3%</strong></div><span class="tsep">·</span>
+    <div class="titem">🎯 Hot Numbers <strong>07 · 14 · 23 · 38 · 42</strong></div><span class="tsep">·</span>
+    <div class="titem">⚡ AI Analysis <strong>Updated Live</strong></div><span class="tsep">·</span>
+    <div class="titem">🥇 Mike R. won <strong>$2.4M</strong> · Powerball</div><span class="tsep">·</span>
+    <div class="titem">📈 Database <strong>25M+ Draws Analyzed</strong></div><span class="tsep">·</span>
+    <!-- duplicate for loop -->
+    <div class="titem">🏆 James T. won <strong>$580,000</strong> · Mega Millions</div><span class="tsep">·</span>
+    <div class="titem">📊 Accuracy Rate <strong>94.3%</strong></div><span class="tsep">·</span>
+    <div class="titem">🎯 Hot Numbers <strong>07 · 14 · 23 · 38 · 42</strong></div><span class="tsep">·</span>
+    <div class="titem">⚡ AI Analysis <strong>Updated Live</strong></div><span class="tsep">·</span>
+    <div class="titem">🥇 Mike R. won <strong>$2.4M</strong> · Powerball</div><span class="tsep">·</span>
+    <div class="titem">📈 Database <strong>25M+ Draws Analyzed</strong></div>
+  </div>
+</div>
+
+<!-- ══════════════ HOW IT WORKS ══════════════ -->
+<section id="how" class="how-section">
+  <div class="container">
+    <div class="reveal">
+      <div class="tag-line">The Process</div>
+      <h2 class="section-heading">Win in just <em>three steps</em></h2>
+      <p class="section-sub">No complexity, no guesswork. GetLottoChamps makes data-driven lottery play effortlessly simple — even for complete beginners.</p>
+    </div>
+
+    <div class="steps-grid reveal">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon-box">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="step-title">Enter Your Preferences</div>
+        <p class="step-desc">Select your lottery game, draw frequency, and play style. This personalizes the AI's entire analysis strategy around exactly how you play.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon-box">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="step-title">AI-Powered Analysis</div>
+        <p class="step-desc">Our engine processes 25M+ historical draws, identifies hot and cold number patterns, statistical trends, and frequency cycles specific to your chosen game.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon-box">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="step-title">Receive Your Numbers</div>
+        <p class="step-desc">Get your personalised, data-backed number set. The system updates every draw — so your predictions always reflect the very latest patterns in real time.</p>
+      </div>
+    </div>
+
+    <div class="demo-box reveal">
+      <div class="demo-head">
+        <span class="demo-label">Live Prediction Sample</span>
+        <span class="demo-live"><span class="demo-dot"></span>LIVE</span>
+      </div>
+      <div class="demo-body">
+        <div class="demo-game">Powerball · Next Draw in 14h 32m</div>
+        <div class="demo-nums">
+          <div class="dnum dnum-g">07</div>
+          <div class="dnum dnum-d">14</div>
+          <div class="dnum dnum-g">23</div>
+          <div class="dnum dnum-d">38</div>
+          <div class="dnum dnum-g">42</div>
+          <div class="dnum dnum-pb">PB 16</div>
+        </div>
+        <div class="demo-conf-row">
+          <span class="demo-conf-label">AI Confidence</span>
+          <span class="demo-conf-val">87%</span>
+        </div>
+        <div class="demo-track"><div class="demo-bar"></div></div>
+        <div class="demo-footer">
+          <span>Based on 847 past draws</span>
+          <span class="demo-fresh">⟳ Updated 2 min ago</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WINNERS MARQUEE -->
+<div class="winners-bar">
+  <div class="winners-belt">
+    <div class="witem"><span class="wname">🏆 James T.</span><span class="wamt">won $580,000</span></div><span class="wsep">★</span>
+    <div class="witem"><span class="wname">🏆 Sarah M.</span><span class="wamt">won $125,000</span></div><span class="wsep">★</span>
+    <div class="witem"><span class="wname">🏆 Mike R.</span><span class="wamt">won $2,400,000</span></div><span class="wsep">★</span>
+    <div class="witem"><span class="wname">🏆 Lisa K.</span><span class="wamt">won $89,500</span></div><span class="wsep">★</span>
+    <div class="witem"><span class="wname">🏆 Robert C.</span><span class="wamt">won $310,000</span></div><span class="wsep">★</span>
+    <div class="witem"><span class="wname">🏆 Emma J.</span><span class="wamt">won $234,600</span></div><span class="wsep">★</span>
+    <div class="witem"><span class="wname">🏆 David W.</span><span class="wamt">won $1,200,000</span></div><span class="wsep">★</span>
+    <!-- duplicate -->
+    <div class="witem"><span class="wname">🏆 James T.</span><span class="wamt">won $580,000</span></div><span class="wsep">★</span>
+    <div class="witem"><span class="wname">🏆 Sarah M.</span><span class="wamt">won $125,000</span></div><span class="wsep">★</span>
+    <div class="witem"><span class="wname">🏆 Mike R.</span><span class="wamt">won $2,400,000</span></div><span class="wsep">★</span>
+    <div class="witem"><span class="wname">🏆 Lisa K.</span><span class="wamt">won $89,500</span></div><span class="wsep">★</span>
+    <div class="witem"><span class="wname">🏆 Robert C.</span><span class="wamt">won $310,000</span></div><span class="wsep">★</span>
+    <div class="witem"><span class="wname">🏆 Emma J.</span><span class="wamt">won $234,600</span></div><span class="wsep">★</span>
+    <div class="witem"><span class="wname">🏆 David W.</span><span class="wamt">won $1,200,000</span></div>
+  </div>
+</div>
+
+<!-- ══════════════ FEATURES ══════════════ -->
+<section id="features" class="features-section">
+  <div class="container">
+    <div class="reveal">
+      <div class="tag-line">What We Offer</div>
+      <h2 class="section-heading">Intelligent tools built<br>for <em>champions</em></h2>
+      <p class="section-sub">Every feature engineered to give you a real, data-backed edge in every single draw you play.</p>
+    </div>
+    <div class="feat-grid reveal">
+      <div class="feat-card">
+        <div class="feat-id">F — 001</div>
+        <div class="feat-icon-box"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg></div>
+        <div class="feat-title">Real-Time Updates</div>
+        <p class="feat-desc">The moment new draw results are published, our AI instantly recalibrates. Your predictions always reflect the very latest statistical reality — never outdated data.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-id">F — 002</div>
+        <div class="feat-icon-box"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+        <div class="feat-title">Maximized Win Odds</div>
+        <p class="feat-desc">Identifying hot, cold and overdue numbers across 25M+ draws eliminates low-probability combinations and surfaces statistically superior number sets.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-id">F — 003</div>
+        <div class="feat-icon-box"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="feat-title">Personalized Strategy</div>
+        <p class="feat-desc">Your recommendations are uniquely tailored to your game type, play preferences, and history — no two members ever get the exact same number set.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-id">F — 004</div>
+        <div class="feat-icon-box"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg></div>
+        <div class="feat-title">Exclusive Members Area</div>
+        <p class="feat-desc">Access a private portal of expert strategy guides, community forums, advanced analytics tools and priority feature releases unavailable anywhere else.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-id">F — 005</div>
+        <div class="feat-icon-box"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg></div>
+        <div class="feat-title">Multi-Game Support</div>
+        <p class="feat-desc">Powerball, Mega Millions, EuroMillions, UK National Lottery and 40+ more — with dedicated, game-specific tuned algorithms for each draw type and region.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-id">F — 006</div>
+        <div class="feat-icon-box"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+        <div class="feat-title">Deep Pattern Engine</div>
+        <p class="feat-desc">Our proprietary AI model runs millions of simulations per draw cycle, surfacing non-obvious statistical patterns across decades of global lottery history.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ GALLERY ══════════════ -->
+<section id="gallery" class="gallery-section">
+  <div class="container">
+    <div class="gallery-top reveal">
+      <div>
+        <div class="tag-line">Visual Stories</div>
+        <h2 class="section-heading">Moments of <em>victory</em></h2>
+      </div>
+      <a href="#" class="btn-outline" style="flex-shrink:0;white-space:nowrap">View All Stories →</a>
+    </div>
+    <div class="gal-grid reveal">
+      <div class="gitem gi1">
+        <img src="https://images.unsplash.com/photo-1559526324-593bc073d938?w=900&q=85" alt="Winner celebration" loading="lazy">
+        <div class="gitem-overlay"></div>
+        <div class="gitem-cap"><div class="gcap-tag">Featured Winner</div><div class="gcap-name">Mike R. — $2.4M Powerball</div></div>
+      </div>
+      <div class="gitem gi2">
+        <img src="https://images.unsplash.com/photo-1579621970588-a35d0e7ab9b6?w=500&q=85" alt="Lottery ticket" loading="lazy">
+        <div class="gitem-overlay"></div>
+        <div class="gitem-cap"><div class="gcap-tag">The Moment</div><div class="gcap-name">Winning Ticket</div></div>
+      </div>
+      <div class="gitem gi3">
+        <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=500&q=85" alt="AI dashboard" loading="lazy">
+        <div class="gitem-overlay"></div>
+        <div class="gitem-cap"><div class="gcap-tag">Platform</div><div class="gcap-name">AI Dashboard</div></div>
+      </div>
+      <div class="gitem gi4">
+        <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=500&q=85" alt="Winner James" loading="lazy">
+        <div class="gitem-overlay"></div>
+        <div class="gitem-cap"><div class="gcap-tag">Winner Story</div><div class="gcap-name">James T. — $580K</div></div>
+      </div>
+      <div class="gitem gi5">
+        <img src="https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=600&q=85" alt="Data analytics" loading="lazy">
+        <div class="gitem-overlay"></div>
+        <div class="gitem-cap"><div class="gcap-tag">Intelligence</div><div class="gcap-name">Pattern Analysis</div></div>
+      </div>
+      <div class="gitem gi6">
+        <img src="https://images.unsplash.com/photo-1533228100845-08145b01de14?w=600&q=85" alt="Community" loading="lazy">
+        <div class="gitem-overlay"></div>
+        <div class="gitem-cap"><div class="gcap-tag">Community</div><div class="gcap-name">Winner Circle</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ TESTIMONIALS ══════════════ -->
+<section id="testimonials" class="testi-section">
+  <div class="container">
+    <div class="reveal" style="text-align:center">
+      <div class="tag-line" style="justify-content:center">Real Winners</div>
+      <h2 class="section-heading">What our <em>champions</em> say</h2>
+    </div>
+    <div class="testi-grid">
+      <div class="tc reveal">
+        <div class="tc-stars"><span class="tc-star">★</span><span class="tc-star">★</span><span class="tc-star">★</span><span class="tc-star">★</span><span class="tc-star">★</span></div>
+        <span class="tc-qmark">"</span>
+        <p class="tc-text">I was skeptical at first — three months later I hit a $580,000 jackpot on Mega Millions. The AI's pattern analysis was unlike anything I'd used. Completely changed how I approach the lottery.</p>
+        <div class="tc-foot">
+          <img class="tc-av" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80" alt="James T">
+          <div><div class="tc-name">James T. — Florida</div><div class="tc-win">🏆 Won $580,000</div></div>
+        </div>
+      </div>
+      <div class="tc reveal">
+        <div class="tc-stars"><span class="tc-star">★</span><span class="tc-star">★</span><span class="tc-star">★</span><span class="tc-star">★</span><span class="tc-star">★</span></div>
+        <span class="tc-qmark">"</span>
+        <p class="tc-text">Real-time updates are a genuine game changer. Every draw the system refreshes new patterns. Within six weeks of signing up I started hitting consistent wins totalling over $45,000.</p>
+        <div class="tc-foot">
+          <img class="tc-av" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80" alt="Sarah M">
+          <div><div class="tc-name">Sarah M. — Texas</div><div class="tc-win">🏆 Won $45,200</div></div>
+        </div>
+      </div>
+      <div class="tc reveal">
+        <div class="tc-stars"><span class="tc-star">★</span><span class="tc-star">★</span><span class="tc-star">★</span><span class="tc-star">★</span><span class="tc-star">★</span></div>
+        <span class="tc-qmark">"</span>
+        <p class="tc-text">As a data analyst myself I was impressed by the algorithm's depth. GetLottoChamps doesn't just pick random numbers — it genuinely surfaces statistical probabilities. Won $310K on Powerball.</p>
+        <div class="tc-foot">
+          <img class="tc-av" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80" alt="Robert C">
+          <div><div class="tc-name">Robert C. — California</div><div class="tc-win">🏆 Won $310,000</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ PRICING ══════════════ -->
+<section id="pricing" class="pricing-section">
+  <div class="container">
+    <div class="reveal" style="text-align:center">
+      <div class="tag-line" style="justify-content:center">Simple Pricing</div>
+      <h2 class="section-heading">One investment.<br><em>Lifetime</em> access.</h2>
+      <p class="section-sub" style="margin:0.9rem auto 0;text-align:center;max-width:460px">No subscriptions, no monthly fees. Pay once and get full lifetime access to GetLottoChamps — including all future updates, exclusively through the official website.</p>
+    </div>
+    <div class="pricing-card reveal">
+      <div class="pricing-topbar"></div>
+      <div class="pricing-inner">
+        <div class="pricing-badge">✦ Most Popular — Limited Time</div>
+        <div class="pricing-old">Was $497</div>
+        <div class="pricing-price"><sup>$</sup>197</div>
+        <div class="pricing-period">One-time payment · Lifetime access</div>
+        <div class="pricing-feats">
+          <div class="pf"><div class="pf-check">✓</div>Full AI prediction engine for all lottery games</div>
+          <div class="pf"><div class="pf-check">✓</div>Real-time lottery data updates &amp; analysis</div>
+          <div class="pf"><div class="pf-check">✓</div>Exclusive members-only strategy portal</div>
+          <div class="pf"><div class="pf-check">✓</div>Hot &amp; cold number trend analysis tools</div>
+          <div class="pf"><div class="pf-check">✓</div>Personalized number recommendations per draw</div>
+          <div class="pf"><div class="pf-check">✓</div>25M+ historical draw database access</div>
+          <div class="pf"><div class="pf-check">✓</div>All future software updates — free forever</div>
+          <div class="pf"><div class="pf-check">✓</div>60-day full money-back guarantee</div>
+        </div>
+        <a href="#" class="btn-primary" style="width:100%;justify-content:center;font-size:0.9rem;padding:1.15rem 2rem">
+          <span>Get Instant Access — $197</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <div class="pricing-guar">
+          <span>🛡</span>
+          <span>60-Day Money-Back Guarantee · Secure Checkout · Official Website Only</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FAQ ══════════════ -->
+<section id="faq" class="faq-section">
+  <div class="container">
+    <div class="reveal">
+      <div class="tag-line">Got Questions?</div>
+      <h2 class="section-heading">Frequently <em>asked</em></h2>
+    </div>
+    <div class="faq-cols reveal">
+      <div class="faq-item">
+        <div class="faq-q">What exactly is GetLottoChamps? <div class="faq-icon">+</div></div>
+        <div class="faq-a">GetLottoChamps is an AI-powered lottery prediction platform that analyzes historical draw data, hot/cold number frequencies and statistical patterns to generate optimized number recommendations personalized to your chosen game.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Does it guarantee that I will win? <div class="faq-icon">+</div></div>
+        <div class="faq-a">No software can guarantee a lottery win since draws are inherently random. GetLottoChamps significantly improves your statistical approach — eliminating low-probability combinations and surfacing high-probability sets for a measurable strategic edge.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Which lotteries does it support? <div class="faq-icon">+</div></div>
+        <div class="faq-a">GetLottoChamps supports Powerball, Mega Millions, EuroMillions, EuroJackpot, UK National Lottery, and 40+ state and regional lotteries globally. New games are added regularly at no extra cost.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How does the one-time payment work? <div class="faq-icon">+</div></div>
+        <div class="faq-a">You pay $197 once through our secure official website. You receive lifetime access to the platform, all current features, and every future update at absolutely no additional cost — ever.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What does the money-back guarantee cover? <div class="faq-icon">+</div></div>
+        <div class="faq-a">We offer a full 60-day money-back guarantee. If you are not completely satisfied with GetLottoChamps for any reason within 60 days of purchase, contact our support team for a complete refund — no questions asked.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is it easy to use for beginners? <div class="faq-icon">+</div></div>
+        <div class="faq-a">Absolutely. GetLottoChamps is designed to be simple and intuitive from the ground up. Even if you have never used prediction software before, you will have your personalized numbers within minutes of signing up.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ CTA ══════════════ -->
+<section class="cta-section">
+  <div class="cta-glow"></div>
+  <div class="container" style="position:relative;z-index:1;text-align:center">
+    <div class="reveal">
+      <div class="tag-line" style="justify-content:center;color:rgba(245,200,66,0.55)">Your Next Step</div>
+      <h2 class="cta-title">Stop leaving wins<br>to <em>chance.</em></h2>
+      <p class="cta-sub">Join 250,000+ members who have transformed their lottery game with AI-powered intelligence. Your first prediction is ready and waiting right now.</p>
+      <div class="cta-balls">
+        <div class="cta-ball cg">07</div>
+        <div class="cta-ball cd">14</div>
+        <div class="cta-ball cg">23</div>
+        <div class="cta-ball cd">38</div>
+        <div class="cta-ball cg">42</div>
+      </div>
+      <a href="#pricing" class="btn-primary" style="font-size:0.9rem;padding:1.2rem 3rem">
+        <span>Claim Lifetime Access — $197</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <p style="margin-top:1.2rem;font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:rgba(255,255,255,0.2);letter-spacing:0.06em">🔒 60-Day Guarantee · Secure Payment · Official Website Only</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <a href="#" class="foot-logo">Get<span>Lotto</span>Champs™</a>
+        <p class="foot-about">The world's most advanced AI-powered lottery prediction platform. Trusted by 250,000+ members across 40+ countries worldwide since 2020.</p>
+        <div class="foot-socials">
+          <a href="#" class="fsoc">f</a>
+          <a href="#" class="fsoc">in</a>
+          <a href="#" class="fsoc">𝕏</a>
+          <a href="#" class="fsoc">▶</a>
+        </div>
+      </div>
+      <div class="foot-col">
+        <div class="foot-head">Product</div>
+        <ul>
+          <li><a href="#">How It Works</a></li>
+          <li><a href="#">Features</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">Members Area</a></li>
+          <li><a href="#">Updates Log</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <div class="foot-head">Company</div>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Winner Stories</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Affiliates</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <div class="foot-head">Legal</div>
+        <ul>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+          <li><a href="#">Disclaimer</a></li>
+          <li><a href="#">Refund Policy</a></li>
+          <li><a href="#">Cookie Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <p class="foot-copy">© 2025 GetLottoChamps™ — All Rights Reserved | Developed by Netsaurs | Results not guaranteed. Lottery involves inherent risk.</p>
+      <div class="foot-legal">
+        <a href="#">Privacy</a><a href="#">Terms</a><a href="#">Disclaimer</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════ SCRIPTS ══════════════ -->
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ─── PAGE LOADER ─── */
+let pct = 0;
+const ldrBar = document.getElementById('ldrBar');
+const ldrNum = document.getElementById('ldrNum');
+const loader  = document.getElementById('page-loader');
+
+const ldrIv = setInterval(() => {
+  pct += Math.random() * 14 + 4;
+  if (pct >= 100) { pct = 100; clearInterval(ldrIv); }
+  ldrBar.style.width = pct + '%';
+  ldrNum.textContent = Math.floor(pct) + '%';
+  if (pct === 100) {
+    setTimeout(() => {
+      gsap.to(loader, { opacity: 0, duration: 0.7, ease: 'power2.inOut',
+        onComplete: () => { loader.style.display = 'none'; startAnimations(); }
+      });
+    }, 280);
+  }
+}, 70);
+
+/* ─── COIN CURSOR (desktop only, single element, no trail) ─── */
+const coinCursor = document.getElementById('coin-cursor');
+const isDesktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+if (isDesktop && coinCursor) {
+  /* Move coin to exact mouse position using transform for performance */
+  document.addEventListener('mousemove', e => {
+    coinCursor.style.left = e.clientX + 'px';
+    coinCursor.style.top  = e.clientY + 'px';
+  });
+
+  /* Scale up on hover of interactive elements */
+  document.querySelectorAll('a, button, .step-card, .feat-card, .tc, .faq-item, .gitem, .pricing-card').forEach(el => {
+    el.addEventListener('mouseenter', () => coinCursor.classList.add('hovered'));
+    el.addEventListener('mouseleave', () => coinCursor.classList.remove('hovered'));
+  });
+}
+
+/* ─── NAV SCROLL ─── */
+window.addEventListener('scroll', () => {
+  document.getElementById('siteNav').classList.toggle('scrolled', scrollY > 40);
+});
+
+/* ─── MOBILE NAV ─── */
+function toggleNav() { document.getElementById('mobDrawer').classList.toggle('open'); }
+function closeNav()  { document.getElementById('mobDrawer').classList.remove('open'); }
+
+/* ─── ALL ANIMATIONS ─── */
+function startAnimations() {
+
+  /* Hero entrance — staggered, clean */
+  gsap.timeline({ delay: 0.1 })
+    .from('.live-badge',   { opacity:0, y:14, duration:0.55, ease:'power2.out' })
+    .from('#heroTitle',    { opacity:0, y:50, duration:0.9,  ease:'power3.out' }, '-=0.2')
+    .from('.hero-desc',    { opacity:0, y:26, duration:0.65, ease:'power2.out' }, '-=0.45')
+    .from('.hero-actions', { opacity:0, y:20, duration:0.6,  ease:'power2.out' }, '-=0.38')
+    .from('.hero-stats',   { opacity:0, y:18, duration:0.55, ease:'power2.out' }, '-=0.32')
+    .from('.lball',        { opacity:0, scale:0, stagger:0.1, duration:0.65, ease:'back.out(1.7)' }, '-=0.25')
+    .from('.pred-card',    { opacity:0, y:14, duration:0.5,  ease:'power2.out' }, '-=0.15');
+
+  /* Animated stat counters */
+  document.querySelectorAll('.cnt').forEach(el => {
+    const target = parseInt(el.dataset.to);
+    ScrollTrigger.create({
+      trigger: el, start: 'top 85%',
+      onEnter: () => {
+        gsap.to({ val: 0 }, {
+          val: target, duration: 2.2, ease: 'power2.out',
+          onUpdate: function () { el.textContent = Math.floor(this.targets()[0].val); }
+        });
+      }
+    });
+  });
+
+  /* Scroll reveal for all .reveal elements */
+  gsap.utils.toArray('.reveal').forEach(el => {
+    gsap.to(el, {
+      opacity: 1, y: 0, duration: 0.85, ease: 'power2.out',
+      scrollTrigger: { trigger: el, start: 'top 84%' }
+    });
+  });
+
+  /* Ball parallax on scroll */
+  gsap.utils.toArray('.lball').forEach((b, i) => {
+    gsap.to(b, {
+      y: i % 2 === 0 ? -20 : 20, ease: 'none',
+      scrollTrigger: { trigger: '.hero-section', start: 'top top', end: 'bottom top', scrub: true }
+    });
+  });
+}
+
+/* ─── FAQ ACCORDION ─── */
+document.querySelectorAll('.faq-item').forEach(item => {
+  item.querySelector('.faq-q').addEventListener('click', () => {
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(f => f.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  });
+});
+</script>
+</body>
+</html>
